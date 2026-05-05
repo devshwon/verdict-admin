@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useToast } from '../components/Toast';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { EmergencyTodayModal } from '../components/EmergencyTodayModal';
 import { errorMessage } from '../lib/errors';
 import { listCandidates, publishToday } from '../lib/candidates';
 import {
@@ -22,6 +23,8 @@ export function CandidatesPage() {
   const [selections, setSelections] = useState<Selections>({});
   const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [emergencyCategory, setEmergencyCategory] = useState<CategoryKey | null>(null);
+  const [emergencyPublished, setEmergencyPublished] = useState<Partial<Record<CategoryKey, string>>>({});
 
   const yesterday = useMemo(() => kstYesterday(), []);
   const today = useMemo(() => kstToday(), []);
@@ -119,6 +122,7 @@ export function CandidatesPage() {
           {CATEGORY_KEYS.map((cat) => {
             const list = grouped[cat];
             const picked = selections[cat];
+            const emergencyVoteId = emergencyPublished[cat];
             return (
               <section key={cat} className="card">
                 <div
@@ -129,23 +133,44 @@ export function CandidatesPage() {
                     marginBottom: 12,
                   }}
                 >
-                  <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <h2 style={{ margin: 0, fontSize: 16 }}>
                       {CATEGORY_LABEL[cat]}{' '}
                       <span style={{ color: 'var(--text-mute)', fontWeight: 400 }}>
                         후보 {list.length}건
                       </span>
                     </h2>
+                    {list.length === 0 && !emergencyVoteId && (
+                      <span className="badge blinded" style={{ fontSize: 11 }}>
+                        ⚠️ 후보 0건
+                      </span>
+                    )}
+                    {emergencyVoteId && (
+                      <span className="badge active" style={{ fontSize: 11 }}>
+                        ✅ 운영팀 직접 등록
+                      </span>
+                    )}
                   </div>
-                  {picked && (
-                    <button
-                      className="ghost"
-                      style={{ fontSize: 12 }}
-                      onClick={() => clearPick(cat)}
-                    >
-                      선택 해제
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {list.length === 0 && !emergencyVoteId && (
+                      <button
+                        className="primary"
+                        style={{ fontSize: 12 }}
+                        onClick={() => setEmergencyCategory(cat)}
+                      >
+                        즉시 등록
+                      </button>
+                    )}
+                    {picked && (
+                      <button
+                        className="ghost"
+                        style={{ fontSize: 12 }}
+                        onClick={() => clearPick(cat)}
+                      >
+                        선택 해제
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {list.length === 0 ? (
@@ -263,6 +288,18 @@ export function CandidatesPage() {
           })}
         </ul>
       </ConfirmDialog>
+
+      <EmergencyTodayModal
+        open={emergencyCategory !== null}
+        category={emergencyCategory ?? 'daily'}
+        onClose={() => setEmergencyCategory(null)}
+        onPublished={(voteId) => {
+          if (emergencyCategory) {
+            setEmergencyPublished((prev) => ({ ...prev, [emergencyCategory]: voteId }));
+            toast.success(`${CATEGORY_LABEL[emergencyCategory]} 카테고리 즉시 등록 완료`);
+          }
+        }}
+      />
     </div>
   );
 }

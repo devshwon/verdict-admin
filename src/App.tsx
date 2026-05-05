@@ -10,6 +10,7 @@ import { VotesPage } from './pages/VotesPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { InquiriesPage } from './pages/InquiriesPage';
 import { UsersPage } from './pages/UsersPage';
+import { CreateNormalVotesPage } from './pages/CreateNormalVotesPage';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/inquiries" element={<InquiriesPage />} />
             <Route path="/users" element={<UsersPage />} />
+            <Route path="/create/normal-votes" element={<CreateNormalVotesPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

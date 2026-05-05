@@ -1,0 +1,78 @@
+import { NavLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { supabase } from '../config/supabase';
+
+const NAV = [
+  { to: '/dashboard', label: '대시보드' },
+  { to: '/candidates', label: '오늘 후보' },
+  { to: '/votes', label: '투표 관리' },
+  { to: '/reports', label: '신고 처리' },
+  { to: '/inquiries', label: '문의사항' },
+  { to: '/users', label: '사용자' },
+];
+
+export function Sidebar() {
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
+  }, []);
+
+  return (
+    <aside
+      style={{
+        width: 220,
+        background: '#0f172a',
+        color: '#e2e8f0',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '24px 16px',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 24, color: '#fff' }}>
+        Verdict Admin
+      </div>
+
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            style={({ isActive }) => ({
+              display: 'block',
+              padding: '8px 12px',
+              borderRadius: 6,
+              fontSize: 14,
+              color: isActive ? '#fff' : '#cbd5e1',
+              background: isActive ? 'rgba(37,99,235,0.25)' : 'transparent',
+              textDecoration: 'none',
+              fontWeight: isActive ? 600 : 400,
+            })}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div style={{ flex: 1 }} />
+
+      <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8, wordBreak: 'break-all' }}>
+        {email}
+      </div>
+      <button
+        onClick={async () => {
+          await supabase.auth.signOut();
+          window.location.assign(`${import.meta.env.BASE_URL}login`);
+        }}
+        style={{
+          background: 'transparent',
+          color: '#cbd5e1',
+          border: '1px solid #334155',
+        }}
+      >
+        로그아웃
+      </button>
+    </aside>
+  );
+}

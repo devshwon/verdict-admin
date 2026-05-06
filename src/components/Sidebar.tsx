@@ -29,7 +29,12 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ mobileOpen = false, onNavigate }: SidebarProps) {
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,17 +42,7 @@ export function Sidebar() {
   }, []);
 
   return (
-    <aside
-      style={{
-        width: 220,
-        background: '#0f172a',
-        color: '#e2e8f0',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 16px',
-        flexShrink: 0,
-      }}
-    >
+    <aside className={`sidebar${mobileOpen ? ' is-open' : ''}`}>
       <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 24, color: '#fff' }}>
         Verdict Admin
       </div>
@@ -76,6 +71,7 @@ export function Sidebar() {
               <NavLink
                 key={item.to}
                 to={item.to}
+                onClick={onNavigate}
                 style={({ isActive }) => ({
                   display: 'block',
                   padding: '8px 12px',

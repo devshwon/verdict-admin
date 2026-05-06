@@ -73,7 +73,6 @@ export async function createNormalVote(input: CreateNormalVoteInput): Promise<st
     p_options: input.options,
     p_category: input.category,
     p_duration_minutes: input.duration_minutes,
-    p_skip_moderation: true,
   });
   if (error) throw error;
   return data as string;

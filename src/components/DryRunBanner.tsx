@@ -11,18 +11,19 @@ export function DryRunBanner() {
 
     async function check() {
       try {
-        const [status, settings] = await Promise.all([
+        const [statusRaw, settings] = await Promise.all([
           getSystemStatus(),
           getSettings('system'),
         ]);
         if (cancelled) return;
+        const dryRun = Boolean(
+          (statusRaw as { payout_dry_run?: unknown } | null)?.payout_dry_run
+        );
         const bannerEnabled = settings.find(
           (s) => s.key === 'admin_dashboard_show_dry_run_banner'
         );
-        const wantBanner = bannerEnabled
-          ? Boolean(bannerEnabled.value)
-          : true;
-        setShow(status.payout_dry_run && wantBanner);
+        const wantBanner = bannerEnabled ? Boolean(bannerEnabled.value) : true;
+        setShow(dryRun && wantBanner);
       } catch {
         if (!cancelled) setShow(false);
       }

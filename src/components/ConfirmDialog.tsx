@@ -5,7 +5,8 @@ export interface ConfirmDialogProps {
   title: string;
   description?: ReactNode;
   confirmLabel?: string;
-  cancelLabel?: string;
+  /** null 이면 취소 버튼을 숨긴다 (정보성 모달) */
+  cancelLabel?: string | null;
   variant?: 'default' | 'danger';
   loading?: boolean;
   onConfirm: () => void;
@@ -60,9 +61,11 @@ export function ConfirmDialog({
             marginTop: 20,
           }}
         >
-          <button onClick={onCancel} disabled={loading}>
-            {cancelLabel}
-          </button>
+          {cancelLabel !== null && (
+            <button onClick={onCancel} disabled={loading}>
+              {cancelLabel}
+            </button>
+          )}
           <button
             className={variant === 'danger' ? 'danger' : 'primary'}
             onClick={onConfirm}

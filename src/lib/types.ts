@@ -63,17 +63,6 @@ export interface VoteReport {
   created_at: string;
 }
 
-export interface UserSearchRow {
-  id: string;
-  email: string | null;
-  user_short: string;
-  register_blocked_until: string | null;
-  consecutive_rejections: number;
-  daily_rejection_count: number;
-  daily_rejection_date: string | null;
-  is_admin: boolean;
-}
-
 export type InquiryStatus = 'open' | 'resolved' | 'dismissed';
 
 export const INQUIRY_STATUS_LABEL: Record<InquiryStatus, string> = {

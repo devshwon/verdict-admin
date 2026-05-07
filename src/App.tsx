@@ -11,6 +11,10 @@ import { ReportsPage } from './pages/ReportsPage';
 import { InquiriesPage } from './pages/InquiriesPage';
 import { UsersPage } from './pages/UsersPage';
 import { CreateNormalVotesPage } from './pages/CreateNormalVotesPage';
+import { TossPromotionsPage } from './pages/TossPromotionsPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { SystemStatusPage } from './pages/SystemStatusPage';
+import { AuditLogPage } from './pages/AuditLogPage';
 
 export default function App() {
   return (
@@ -34,6 +38,10 @@ export default function App() {
             <Route path="/inquiries" element={<InquiriesPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/create/normal-votes" element={<CreateNormalVotesPage />} />
+            <Route path="/config/toss-promotions" element={<TossPromotionsPage />} />
+            <Route path="/config/settings" element={<SettingsPage />} />
+            <Route path="/config/system-status" element={<SystemStatusPage />} />
+            <Route path="/config/audit-log" element={<AuditLogPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -20,12 +20,21 @@ const NAV_SECTIONS: NavSection[] = [
       { to: '/votes', label: '투표 관리' },
       { to: '/reports', label: '신고 처리' },
       { to: '/inquiries', label: '문의사항' },
-      { to: '/users', label: '사용자' },
+      { to: '/users', label: '사용자 관리' },
     ],
   },
   {
     title: '컨텐츠 생성',
     items: [{ to: '/create/normal-votes', label: '일반투표 생성기' }],
+  },
+  {
+    title: '운영 설정',
+    items: [
+      { to: '/config/toss-promotions', label: '토스 프로모션 매핑' },
+      { to: '/config/settings', label: '통합 설정' },
+      { to: '/config/system-status', label: '시스템 상태' },
+      { to: '/config/audit-log', label: '감사 로그' },
+    ],
   },
 ];
 

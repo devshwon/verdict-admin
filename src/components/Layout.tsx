@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { DryRunBanner } from './DryRunBanner';
+import { ErrorBoundary } from './ErrorBoundary';
 
 export function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,8 +33,10 @@ export function Layout() {
       )}
       <Sidebar mobileOpen={mobileOpen} onNavigate={() => setMobileOpen(false)} />
       <main className="layout__main">
-        <DryRunBanner />
-        <Outlet />
+        <ErrorBoundary resetKey={location.pathname}>
+          <DryRunBanner />
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );

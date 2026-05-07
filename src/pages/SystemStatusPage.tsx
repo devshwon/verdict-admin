@@ -1,7 +1,29 @@
 import { useEffect, useState } from 'react';
 import { errorMessage } from '../lib/errors';
-import { SystemStatus, getSystemStatus } from '../lib/admin-config';
+import { CronJobStatus, SystemStatus, getSystemStatus } from '../lib/admin-config';
 import { formatKst } from '../lib/date';
+
+function toFiniteInt(v: unknown): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function normalize(raw: unknown): SystemStatus {
+  const obj = (raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {});
+  const cronRaw = obj.cron_jobs;
+  const openaiRaw = (obj.openai_today && typeof obj.openai_today === 'object'
+    ? (obj.openai_today as Record<string, unknown>)
+    : {});
+  return {
+    payout_dry_run: Boolean(obj.payout_dry_run),
+    cron_jobs: Array.isArray(cronRaw) ? (cronRaw as CronJobStatus[]) : [],
+    openai_today: {
+      topic_gen_today: toFiniteInt(openaiRaw.topic_gen_today),
+    },
+    fetched_at:
+      typeof obj.fetched_at === 'string' ? obj.fetched_at : new Date().toISOString(),
+  };
+}
 
 export function SystemStatusPage() {
   const [status, setStatus] = useState<SystemStatus | null>(null);
@@ -13,7 +35,7 @@ export function SystemStatusPage() {
     setError(null);
     try {
       const data = await getSystemStatus();
-      setStatus(data);
+      setStatus(normalize(data));
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -150,15 +172,9 @@ export function SystemStatusPage() {
               }}
             >
               <div>
-                <div style={{ fontSize: 12, color: 'var(--text-mute)' }}>검열 호출</div>
-                <div style={{ fontSize: 24, fontWeight: 700 }}>
-                  {status.openai_today.moderation_today.toLocaleString()}
-                </div>
-              </div>
-              <div>
                 <div style={{ fontSize: 12, color: 'var(--text-mute)' }}>주제 생성</div>
                 <div style={{ fontSize: 24, fontWeight: 700 }}>
-                  {status.openai_today.topic_gen_today.toLocaleString()}
+                  {toFiniteInt(status.openai_today?.topic_gen_today).toLocaleString()}
                 </div>
               </div>
             </div>

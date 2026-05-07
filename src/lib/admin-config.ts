@@ -40,7 +40,6 @@ export interface TossPromotionRow {
 export interface UserAdminRow {
   id: string;
   user_short: string;
-  nickname: string | null;
   email: string | null;
   created_at: string;
   is_admin: boolean;
@@ -85,7 +84,6 @@ export interface SystemStatus {
   payout_dry_run: boolean;
   cron_jobs: CronJobStatus[];
   openai_today: {
-    moderation_today: number;
     topic_gen_today: number;
   };
   fetched_at: string;
@@ -137,11 +135,11 @@ export async function setSetting(
   if (error) throw error;
 }
 
-// 시스템 상태
-export async function getSystemStatus(): Promise<SystemStatus> {
+// 시스템 상태 — 일부 필드 누락 가능성 있어 호출 측에서 normalize
+export async function getSystemStatus(): Promise<unknown> {
   const { data, error } = await supabase.rpc('admin_get_system_status');
   if (error) throw error;
-  return data as SystemStatus;
+  return data;
 }
 
 // 사용자 관리

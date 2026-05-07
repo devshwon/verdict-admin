@@ -158,12 +158,12 @@ export function UsersPage() {
           style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}
         >
           <div style={{ flex: 1 }}>
-            <label htmlFor="user-search">검색 (닉네임 / user_short 4자리)</label>
+            <label htmlFor="user-search">검색 (이메일 일부 / user_short 4자리)</label>
             <input
               id="user-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="홍길동 / 9F2C"
+              placeholder="user@example.com / 9F2C"
               autoComplete="off"
             />
           </div>
@@ -198,7 +198,7 @@ export function UsersPage() {
           <table>
             <thead>
               <tr>
-                <th>닉네임</th>
+                <th>이메일</th>
                 <th>user_short</th>
                 <th>가입일</th>
                 <th>상태</th>
@@ -213,12 +213,9 @@ export function UsersPage() {
                   <tr key={row.id} onClick={() => setDetail(row)}>
                     <td>
                       <div style={{ fontWeight: 600 }}>
-                        {row.nickname || (
-                          <span style={{ color: 'var(--text-mute)' }}>(없음)</span>
+                        {row.email || (
+                          <span style={{ color: 'var(--text-mute)' }}>(이메일 없음)</span>
                         )}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-mute)' }}>
-                        {row.email ?? '-'}
                       </div>
                     </td>
                     <td>
@@ -289,7 +286,11 @@ export function UsersPage() {
 
       <ConfirmDialog
         open={!!detail && !unblockTarget && !adminToggle}
-        title={detail ? `${detail.nickname || '(이름 없음)'} (${detail.user_short})` : ''}
+        title={
+          detail
+            ? `${detail.email || '(이메일 없음)'} (${detail.user_short})`
+            : ''
+        }
         confirmLabel="닫기"
         cancelLabel={null}
         onCancel={() => setDetail(null)}
@@ -395,7 +396,7 @@ export function UsersPage() {
           adminToggle && (
             <span>
               <code>{adminToggle.user.user_short}</code>{' '}
-              {adminToggle.user.nickname || adminToggle.user.email || ''} 의 권한을{' '}
+              {adminToggle.user.email || '(이메일 없음)'} 의 권한을{' '}
               {adminToggle.action === 'grant' ? '부여' : '회수'}합니다.
             </span>
           )

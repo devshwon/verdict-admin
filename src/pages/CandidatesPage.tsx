@@ -152,11 +152,16 @@ export function CandidatesPage() {
                     )}
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    {list.length === 0 && !emergencyVoteId && (
+                    {!emergencyVoteId && (
                       <button
-                        className="primary"
+                        className={list.length === 0 ? 'primary' : ''}
                         style={{ fontSize: 12 }}
                         onClick={() => setEmergencyCategory(cat)}
+                        title={
+                          list.length === 0
+                            ? '후보가 없어 운영팀이 직접 등록'
+                            : '후보가 있더라도 쓸만한 게 없을 때 운영팀이 직접 등록 (후보 풀과 무관하게 today 발행)'
+                        }
                       >
                         즉시 등록
                       </button>
@@ -186,8 +191,24 @@ export function CandidatesPage() {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {emergencyVoteId && (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: 'var(--warn)',
+                          padding: 8,
+                          background: '#fffbeb',
+                          border: '1px solid #fbbf24',
+                          borderRadius: 6,
+                        }}
+                      >
+                        이 카테고리는 운영팀 직접 등록으로 today 가 이미 발행됐습니다. 후보 선택은
+                        비활성화됩니다.
+                      </div>
+                    )}
                     {list.map((c) => {
                       const checked = picked === c.id;
+                      const disabled = !!emergencyVoteId;
                       return (
                         <label
                           key={c.id}
@@ -200,8 +221,13 @@ export function CandidatesPage() {
                               checked ? 'var(--primary)' : 'var(--border)'
                             }`,
                             borderRadius: 6,
-                            background: checked ? 'rgba(37,99,235,0.06)' : '#fff',
-                            cursor: 'pointer',
+                            background: disabled
+                              ? '#f3f4f6'
+                              : checked
+                              ? 'rgba(37,99,235,0.06)'
+                              : '#fff',
+                            cursor: disabled ? 'not-allowed' : 'pointer',
+                            opacity: disabled ? 0.55 : 1,
                             margin: 0,
                           }}
                         >
@@ -209,6 +235,7 @@ export function CandidatesPage() {
                             type="radio"
                             name={`pick-${cat}`}
                             checked={checked}
+                            disabled={disabled}
                             onChange={() => pick(cat, c.id)}
                             style={{ width: 'auto', marginTop: 4 }}
                           />
@@ -295,8 +322,11 @@ export function CandidatesPage() {
         onClose={() => setEmergencyCategory(null)}
         onPublished={(voteId) => {
           if (emergencyCategory) {
-            setEmergencyPublished((prev) => ({ ...prev, [emergencyCategory]: voteId }));
-            toast.success(`${CATEGORY_LABEL[emergencyCategory]} 카테고리 즉시 등록 완료`);
+            const cat = emergencyCategory;
+            setEmergencyPublished((prev) => ({ ...prev, [cat]: voteId }));
+            // 동일 카테고리에 이미 today 가 있으면 후보 발행 RPC 가 거부하므로 선택 자동 해제
+            clearPick(cat);
+            toast.success(`${CATEGORY_LABEL[cat]} 카테고리 즉시 등록 완료`);
           }
         }}
       />

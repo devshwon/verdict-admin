@@ -11,6 +11,7 @@ const ACTION_LABEL: Record<AuditAction, string> = {
   unblock_user: '🔓 차단 해제',
   grant_admin: '👑 관리자 부여',
   revoke_admin: '🚫 관리자 회수',
+  reset_user_data: '🧪 사용자 데이터 초기화',
 };
 
 const ACTION_OPTIONS: { value: AuditAction | 'all'; label: string }[] = [
@@ -20,6 +21,7 @@ const ACTION_OPTIONS: { value: AuditAction | 'all'; label: string }[] = [
   { value: 'unblock_user', label: ACTION_LABEL.unblock_user },
   { value: 'grant_admin', label: ACTION_LABEL.grant_admin },
   { value: 'revoke_admin', label: ACTION_LABEL.revoke_admin },
+  { value: 'reset_user_data', label: ACTION_LABEL.reset_user_data },
 ];
 
 export function AuditLogPage() {

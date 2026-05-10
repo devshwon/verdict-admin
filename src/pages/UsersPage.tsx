@@ -3,10 +3,12 @@ import { useToast } from '../components/Toast';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { errorMessage } from '../lib/errors';
 import {
+  ResetUserDataResult,
   UserAdminRow,
   grantAdmin,
   isCurrentlyBlocked,
   listUsers,
+  resetUserData,
   revokeAdmin,
   unblockUser,
 } from '../lib/admin-config';
@@ -42,6 +44,9 @@ export function UsersPage() {
   const [unblockTarget, setUnblockTarget] = useState<UserAdminRow | null>(null);
   const [adminToggle, setAdminToggle] = useState<AdminToggleTarget | null>(null);
   const [adminReason, setAdminReason] = useState('');
+  const [resetTarget, setResetTarget] = useState<UserAdminRow | null>(null);
+  const [resetReason, setResetReason] = useState('');
+  const [resetResult, setResetResult] = useState<ResetUserDataResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function load() {
@@ -90,6 +95,28 @@ export function UsersPage() {
       toast.success('차단 해제 완료');
       setUnblockTarget(null);
       setDetail(null);
+      await load();
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function confirmResetUserData() {
+    if (!resetTarget) return;
+    if (resetReason.trim() === '') {
+      toast.error('초기화 사유를 입력하세요.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const result = await resetUserData(resetTarget.id, resetReason.trim());
+      toast.success('사용자 활동 데이터를 초기화했습니다.');
+      setResetTarget(null);
+      setResetReason('');
+      setDetail(null);
+      setResetResult(result);
       await load();
     } catch (e) {
       toast.error(errorMessage(e));
@@ -285,7 +312,7 @@ export function UsersPage() {
       )}
 
       <ConfirmDialog
-        open={!!detail && !unblockTarget && !adminToggle}
+        open={!!detail && !unblockTarget && !adminToggle && !resetTarget}
         title={
           detail
             ? `${detail.email || '(이메일 없음)'} (${detail.user_short})`
@@ -364,6 +391,18 @@ export function UsersPage() {
                   관리자 권한 부여
                 </button>
               )}
+              {!detail.is_admin && !detail.is_system && (
+                <button
+                  className="danger"
+                  title="테스트용 — 활동 데이터 모두 삭제"
+                  onClick={() => {
+                    setResetReason('');
+                    setResetTarget(detail);
+                  }}
+                >
+                  🧪 활동 데이터 초기화
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -381,6 +420,73 @@ export function UsersPage() {
         {unblockTarget && (
           <div style={{ fontSize: 13 }}>
             <code>{unblockTarget.user_short}</code> {unblockTarget.email || '(이메일 없음)'}
+          </div>
+        )}
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={!!resetTarget}
+        title="⚠️ 활동 데이터 초기화 (테스트용)"
+        description={
+          resetTarget && (
+            <div>
+              <div>
+                <code>{resetTarget.user_short}</code>{' '}
+                {resetTarget.email || '(이메일 없음)'} 의 활동 데이터를{' '}
+                <strong>모두 삭제</strong>합니다.
+              </div>
+              <ul style={{ margin: '8px 0 0', paddingLeft: 18, fontSize: 12 }}>
+                <li>등록한 투표 / 참여 / 후보 공감 / 신고 / 문의</li>
+                <li>포인트 로그 / 광고 시청 / 결과 unlock / 무료 패스</li>
+                <li>차단/반려/모더레이션/스트릭/보고 카운터 전부 리셋</li>
+              </ul>
+              <div style={{ marginTop: 8, fontSize: 12 }}>
+                계정 자체(가입일/인구통계)는 유지됩니다. 되돌릴 수 없습니다.
+              </div>
+            </div>
+          )
+        }
+        confirmLabel="초기화 실행"
+        variant="danger"
+        loading={submitting}
+        onCancel={() => {
+          setResetTarget(null);
+          setResetReason('');
+        }}
+        onConfirm={confirmResetUserData}
+      >
+        <div style={{ marginTop: 8 }}>
+          <label htmlFor="reset-reason">초기화 사유 (필수)</label>
+          <textarea
+            id="reset-reason"
+            value={resetReason}
+            onChange={(e) => setResetReason(e.target.value)}
+            rows={2}
+            autoFocus
+            placeholder="예: QA 테스트 시나리오 재실행"
+          />
+        </div>
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={!!resetResult}
+        title="초기화 완료"
+        confirmLabel="닫기"
+        cancelLabel={null}
+        onCancel={() => setResetResult(null)}
+        onConfirm={() => setResetResult(null)}
+      >
+        {resetResult && (
+          <div style={{ fontSize: 13 }}>
+            <div style={{ marginBottom: 8, color: 'var(--text-mute)' }}>
+              삭제된 행 수
+            </div>
+            {Object.entries(resetResult.deleted).map(([k, v]) => (
+              <Row key={k} label={k} value={`${v}건`} />
+            ))}
+            <div style={{ marginTop: 12, color: 'var(--text-mute)' }}>
+              users 부가 카운터 {resetResult.reset_columns.length}개 컬럼 리셋
+            </div>
           </div>
         )}
       </ConfirmDialog>

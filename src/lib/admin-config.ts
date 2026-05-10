@@ -58,7 +58,8 @@ export type AuditAction =
   | 'toss_promotion_change'
   | 'unblock_user'
   | 'grant_admin'
-  | 'revoke_admin';
+  | 'revoke_admin'
+  | 'reset_user_data';
 
 export interface AuditLogRow {
   id: string;
@@ -162,6 +163,35 @@ export async function listUsers(params: {
 export async function unblockUser(userId: string) {
   const { error } = await supabase.rpc('admin_unblock_user', { p_user_id: userId });
   if (error) throw error;
+}
+
+export interface ResetUserDataResult {
+  ok: boolean;
+  deleted: {
+    votes: number;
+    vote_casts: number;
+    today_candidate_recommendations: number;
+    vote_reports: number;
+    reports: number;
+    inquiries: number;
+    vote_unlocks: number;
+    ad_watches: number;
+    free_pass_grants: number;
+    points_log: number;
+  };
+  reset_columns: string[];
+}
+
+export async function resetUserData(
+  userId: string,
+  reason: string
+): Promise<ResetUserDataResult> {
+  const { data, error } = await supabase.rpc('admin_reset_user_data', {
+    p_user_id: userId,
+    p_reason: reason,
+  });
+  if (error) throw error;
+  return data as ResetUserDataResult;
 }
 
 export async function grantAdmin(targetUserId: string, reason: string) {
